@@ -1,0 +1,185 @@
+{
+  "student": {
+    "name": "John Doe",
+    "course": {
+      "name": "GNM Nursing",
+      "duration": "3 Years",
+      "totalSemesters": 5,
+      "currentSemester": 3,
+      "startDate": "2023-01-10",
+      "endDate": "2026-01-10",
+      "examsGiven": 4,
+      "backlogs": 1,
+      "attendancePercentage": 82
+    }
+  },
+  "paymentReceipt": {
+    "college": "M.R College of Pharmaceutical Sciences & Research",
+    "date": "2025-08-01",
+    "billNo": "MRHO-2025-1784",
+    "student": "Priyanka Mandal",
+    "contact": "9046602538",
+    "address": "Durgapur, Goura, Paschim Medinipur, Pin-721146",
+    "course": "B.Pharm",
+    "session": "2025-2029",
+    "payments": [
+      {
+        "amount": 30000,
+        "mode": "Online",
+        "transactionId": "743677044066/282592493373",
+        "bank": "Indian+ Ujjivan"
+      },
+      {
+        "amount": 20000,
+        "mode": "Cash"
+      }
+    ],
+    "paidAmount": 50000,
+    "totalAdmissionFees": 12500,
+    "dueAmount": 37500,
+    "dueDate": "2025-08-01"
+  },
+  "semesterPayments": [
+    {
+      "semester": 1,
+      "amount": 56250,
+      "dueDate": "08-12-2025",
+      "receivedDate": "07-12-2025",
+      "billNo": "MRHO-2025-1784",
+      "invoiceUrl": "https://example.com/invoice-sem1"
+    },
+    {
+      "semester": 2,
+      "amount": 56250,
+      "dueDate": "07-05-2026",
+      "receivedDate": null,
+      "billNo": null,
+      "invoiceUrl": ""
+    },
+    {
+      "semester": 3,
+      "amount": 56250,
+      "dueDate": "07-12-2026",
+      "receivedDate": null,
+      "billNo": null,
+      "invoiceUrl": ""
+    },
+    {
+      "semester": 4,
+      "amount": 56250,
+      "dueDate": "07-05-2027",
+      "receivedDate": null,
+      "billNo": null,
+      "invoiceUrl": ""
+    },
+    {
+      "semester": 5,
+      "amount": 56250,
+      "dueDate": "07-12-2027",
+      "receivedDate": null,
+      "billNo": null,
+      "invoiceUrl": ""
+    },
+    {
+      "semester": 6,
+      "amount": 56250,
+      "dueDate": "08-05-2028",
+      "receivedDate": null,
+      "billNo": null,
+      "invoiceUrl": ""
+    },
+    {
+      "semester": 7,
+      "amount": 56250,
+      "dueDate": "07-12-2028",
+      "receivedDate": null,
+      "billNo": null,
+      "invoiceUrl": ""
+    },
+    {
+      "semester": 8,
+      "amount": 56250,
+      "dueDate": "07-05-2029",
+      "receivedDate": null,
+      "billNo": null,
+      "invoiceUrl": ""
+    }
+  ],
+  "studentDocuments": [
+    {
+      "title": "10th Grade Marksheet",
+      "uploadedOn": "2022-03-14",
+      "fileUrl": "https://example.com/10th-grade-marksheet.pdf"
+    },
+    {
+      "title": "12th Grade Marksheet",
+      "uploadedOn": "2024-03-12",
+      "fileUrl": "https://example.com/12th-grade-marksheet.pdf"
+    },
+    {
+      "title": "Aadhar Card",
+      "uploadedOn": "2024-06-01",
+      "fileUrl": "https://example.com/aadhar-card.pdf"
+    },
+    {
+      "title": "Transfer Certificate",
+      "uploadedOn": "2024-07-20",
+      "fileUrl": "https://example.com/transfer-certificate.pdf"
+    }
+  ],
+  "certificates": [
+    {
+      "title": "Provisional Degree Certificate",
+      "templateUrl": "https://via.placeholder.com/600x400?text=Degree+Certificate",
+      "locked": true
+    },
+    {
+      "title": "Character Certificate",
+      "templateUrl": "https://via.placeholder.com/600x400?text=Character+Certificate",
+      "locked": true
+    },
+    {
+      "title": "Course Completion Certificate",
+      "templateUrl": "https://via.placeholder.com/600x400?text=Course+Completion",
+      "locked": true
+    }
+  ],
+  "idCard": {
+    "studentName": "John Doe",
+    "collegeName": "M.R College of Pharmaceutical Sciences & Research",
+    "bloodGroup": "B+",
+    "address": "Durgapur, Goura, Paschim Medinipur, Pin-721146",
+    "emergencyContacts": [
+      {
+        "name": "Priyanka Mandal",
+        "relation": "Mother",
+        "phone": "9046602538"
+      },
+      {
+        "name": "Rahul Das",
+        "relation": "Father",
+        "phone": "9876543210"
+      }
+    ]
+  },
+  "notices": [
+    {
+      "id": 1,
+      "title": "Admission Notice 2025",
+      "date": "2025-07-30",
+      "pdfUrl": "/assets/demo-notice.pdf"
+    },
+    {
+      "id": 2,
+      "title": "Exam Schedule Summer 2025",
+      "date": "2025-06-10",
+      "pdfUrl": "/assets/demo-notice.pdf"
+    },
+    {
+      "id": 3,
+      "title": "Fee Payment Guidelines",
+      "date": "2025-05-01",
+      "pdfUrl": "/assets/demo-notice.pdf"
+    }
+  ]
+}

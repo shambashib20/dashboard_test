@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Acknowledgement</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .form-box {
+            width: 100%;
+            margin: 0 auto;
+            background: #fff;
+        }
+
+        .header-box {
+            width: 100%;
+            background: #053D7A;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .header-box .heading {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .header-box .tagline {
+            color: #fff;
+            font-size: 20px;
+            padding: 15px 0;
+        }
+
+        .body-box {
+            width: 100%;
+            padding: 30px 30px 0 30px;
+            display: inline-block;
+            color: #000;
+            background: #fff;
+        }
+
+        .body-box .location {
+            width: 100%;
+            float: left;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: #053D7A;
+        }
+
+        .body-box .off-box {
+            width: 100%;
+            float: left;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #053D7A;
+            padding: 10px 0;
+        }
+
+        .body-box .date-box {
+            width: 20%;
+            float: left;
+            font-size: 18px;
+        }
+
+        .body-box .title-box {
+            width: 53%;
+            float: left;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .body-box .form-num-box {
+            width: 27%;
+            float: left;
+            text-align: right;
+            font-size: 20px;
+        }
+
+        .body-box .fill-box {
+            width: 100%;
+        }
+
+        .body-box .fill-box label {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .body-box .fill-box .text-box {
+            padding: 10px 12px;
+            border: none;
+            font-size: 18px;
+            border-bottom: dotted 1px #575757;
+            width: 100%;
+            margin-bottom: 8px;
+            background: #fff;
+        }
+
+        .body-box .fill-box .sig-box {
+            padding: 10px 12px;
+            border: none;
+            border-bottom: solid 1px #CACACA;
+            width: 100%;
+            margin-bottom: 8px;
+            background: #fff;
+        }
+
+        .body-box .fill-box .inner-title {
+            font-size: 20px;
+            padding: 13px;
+            text-align: center;
+            color: #053D7A;
+            font-weight: 600;
+        }
+
+        .body-box .fill-box .inner-tab-title {
+            padding: 14px 30px;
+            text-align: center;
+            background: #053D7A;
+            color: #fff;
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 16px;
+        }
+
+        .body-box .fill-box .bottom-middle {
+            padding: 14px 5px;
+            color: #000;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .body-box .fill-box .bottom-title {
+            padding: 8px;
+            color: #053D7A;
+            font-size: 20px;
+        }
+
+        .body-box .fill-box .con-content {
+            padding: 8px;
+            color: #3A3A3A;
+            font-size: 12px;
+        }
+
+        .body-box .fill-box .seal {
+            border: solid 1px #000;
+            color: #000;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            line-height: 100px;
+            text-align: center;
+        }
+
+        .data-show {
+            border-bottom: dashed 1px #000;
+            margin: 9px 0;
+            padding: 0px 0px 5px 5px;
+            font-size: 20px;
+        }
+        
+        .print-button {
+            text-align: right;
+            margin: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #d9534f;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn:hover {
+            background-color: #c9302c;
+        }
+        
+        @media print {
+            .print-button {
+                display: none;
+            }
+            
+            @page {
+                margin: 0;
+            }
+            
+            body {
+                margin: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-button">
+        <button class="btn" onclick="window.print()">Print</button>
+    </div>
+
+    <div class="form-box">
+        <div class="header-box">
+            <div class="heading"><img src="https://via.placeholder.com/90x50/053D7A/FFFFFF?text=MR+LOGO" style="width:90px;"> M. R. GROUP OF COLLEGES & HOSPITALS</div>
+            <div class="tagline">ACADEMIC EXCELLENCE SINCE 2012 || www.mrgroupofcolleges.com</div>
+        </div>
+        <div class="body-box">
+            <div class="date-box">Date: 15-07-2023</div>
+            <div class="title-box">PAYMENT ACKNOWLEDGEMENT</div>
+            <div class="form-num-box">Bill No. BILL-2023-001</div>
+
+            <div class="fill-box">
+                <table cellspacing="0" cellpadding="1" border="0" width="100%">
+                    <tbody>
+                        <tr>
+                            <td colspan="4" style="height:20px"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:18%;"><label>Name of College</label></td>
+                            <td style="width:82%;" colspan="3">
+                                <div class="data-show">MR College of Engineering</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:18%;"><label>Course Name</label></td>
+                            <td style="width:34%;">
+                                <div class="data-show">Bachelor of Technology</div>
+                            </td>
+                            <td style="width:14%;text-align:right"><label>Session</label>
+                            </td>
+                            <td style="width:34%;">
+                                <div class="data-show">2023-2024</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label>Student Name</label></td>
+                            <td colspan="3">
+                                <div class="data-show">Rahul Sharma</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:18%;"><label>Contact Number</label></td>
+                            <td style="width:34%;">
+                                <div class="data-show">9876543210</div>
+                            </td>
+                            <td style="width:14%;text-align:right"><label>Student ID</label>
+                            </td>
+                            <td style="width:34%;">
+                                <div class="data-show">STU2023001</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label>Address</label></td>
+                            <td colspan="3">
+                                <div class="data-show">123 Main Street, New Delhi, India</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="height:20px;"></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="4" style="background:#E8F3FF">
+                                <table cellspacing="0" cellpadding="1" border="1" width="100%" style="border: solid 1px #4A96E9;" bordercolor="#4A96E9">
+                                    <tbody>
+                                        <tr>
+                                            <td class="inner-tab-title">Amount</td>
+                                            <td class="inner-tab-title">Mode of <br>Payment</td>
+                                            <td class="inner-tab-title">Transaction ID/Cheque No.</td>
+                                            <td class="inner-tab-title">Bank Name</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bottom-middle">15,000.00</td>
+                                            <td class="bottom-middle">Online</td>
+                                            <td class="bottom-middle">TXN123456789</td>
+                                            <td class="bottom-middle">State Bank of India</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bottom-middle">10,000.00</td>
+                                            <td class="bottom-middle">Cash</td>
+                                            <td class="bottom-middle">-</td>
+                                            <td class="bottom-middle">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" class="bottom-title">
+                                                <strong>Paid Amount :</strong> <i class="fa fa-inr"></i>25,000.00
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" class="bottom-title">
+                                                <strong>Total Admission Fees:</strong>&nbsp;&nbsp; <i class="fa fa-inr"></i>75,000.00
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="bottom-title">
+                                                <strong>Total Admission Fees Due:</strong>&nbsp;&nbsp; <i class="fa fa-inr"></i>50,000.00
+                                            </td>
+                                            <td colspan="2" class="bottom-title">
+                                                <strong>Due Date:</strong> 30-07-2023
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="4" style="height:20px;"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <table cellspacing="0" cellpadding="1" border="0" width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width:24%;"><input type="text" class="sig-box" readonly></td>
+                                            <td style="width:2%;">&nbsp;</td>
+                                            <td style="width:24%;"><input type="text" class="sig-box" readonly></td>
+                                            <td style="width:2%;">&nbsp;</td>
+                                            <td style="width:24%;"><input type="text" class="sig-box" readonly></td>
+                                            <td style="width:9%;">&nbsp;</td>
+                                            <td style="width:15%;" rowspan="2">
+                                                <div class="seal">Seal</div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align:center;"><label>Student's Signature</label></td>
+                                            <td>&nbsp;</td>
+                                            <td style="text-align:center;"><label>Authorised Signatory</label></td>
+                                            <td>&nbsp;</td>
+                                            <td style="text-align:center;"><label>Scrutinizer</label></td>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="height:20px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

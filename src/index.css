@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+.cert_page {
+  page-break-after: always;
+}

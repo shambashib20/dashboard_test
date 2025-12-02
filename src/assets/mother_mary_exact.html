@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mother Mary / Mother Teresa - ID Card (Exact Replica)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap');
+  :root{--accent:#8b4662;--accent-dark:#6f3350;--teal:#007F7B;--card-w:420px}
+  body{background:#f3f3f5;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:Poppins,system-ui,Arial}
+  .card{width:var(--card-w);background:white;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,0.12);overflow:hidden}
+  .header{background:linear-gradient(180deg,var(--accent),#b86a84);padding:22px 20px 48px;position:relative;color:white;text-align:center}
+  .logo{position:absolute;left:18px;top:16px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px}
+  .inst{font-weight:800;letter-spacing:0.6px;font-size:16px;margin-bottom:4px}
+  .inst-sub{font-weight:600;font-size:12px;opacity:0.95}
+  .photo-wrap{position:relative;margin-top:8px}
+  .photo{width:124px;height:124px;border-radius:999px;border:8px solid white;object-fit:cover;display:block;margin:0 auto;box-shadow:0 8px 26px rgba(0,0,0,0.14)}
+  .body{padding:20px 28px 18px}
+  .name{font-size:20px;font-weight:800;text-align:center;color:var(--accent-dark);margin:8px 0 6px}
+  .surname{color:#6c2f4a;font-weight:700}
+  .info{margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;font-size:13px;color:#222}
+  .label{opacity:0.8;font-weight:700;font-size:12px}
+  .value{font-weight:700}
+  .full{grid-column:1/3;margin-top:6px}
+  .sign{border-top:1px solid rgba(0,0,0,0.06);padding-top:8px;margin-top:10px;text-align:center;color:#444;font-weight:600}
+  .footer{background:var(--accent-dark);color:white;padding:10px 14px;text-align:center;font-weight:700;font-size:12px}
+  @media (max-width:480px){:root{--card-w:92vw}}
+</style>
+</head>
+<body>
+<article class="card" role="img" aria-label="Student ID card">
+  <div class="header">
+    <div class="logo">M&R</div>
+    <div class="inst">MOTHER TERESA</div>
+    <div class="inst-sub">INSTITUTE OF EDUCATION</div>
+    <div class="photo-wrap">
+      <!-- Using the provided image from your upload. If you want the PDF rendered instead, replace src with the PDF-rendered image URL. -->
+      <img class="photo" src="/mnt/data/mother_mary_institute_of_nursing.jpg" alt="Profile photo">
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="name">HALEMA <span class="surname">YEASMIN</span></div>
+
+    <div class="info">
+      <div>
+        <div class="label">ROLL NO.</div>
+        <div class="value">MRIN/047/24</div>
+      </div>
+      <div>
+        <div class="label">COURSE</div>
+        <div class="value">B. PHARMA</div>
+      </div>
+
+      <div>
+        <div class="label">SESSION</div>
+        <div class="value">2023 - 2026</div>
+      </div>
+      <div>
+        <div class="label">EMG. CONTACT</div>
+        <div class="value">75510 21339</div>
+      </div>
+
+      <div class="full">
+        <div class="label">BLOOD GR.</div>
+        <div class="value">B-</div>
+      </div>
+
+      <div class="full sign">Authorised Signatory</div>
+    </div>
+  </div>
+
+  <div class="footer">M.R. GROUP OF COLLEGES &amp; HOSPITALS</div>
+</article>
+</body>
+</html>

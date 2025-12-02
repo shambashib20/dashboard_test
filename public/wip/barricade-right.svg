@@ -1,0 +1,13 @@
+<svg width="180" height="120" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="70" width="160" height="20" fill="#2d3748"></rect>
+  <rect x="20" y="50" width="140" height="20" fill="#e53e3e"></rect>
+  <rect x="20" y="50" width="140" height="20" fill="url(#stripe)"></rect>
+  <rect x="20" y="30" width="140" height="18" fill="#2d3748"></rect>
+  
+  <defs>
+    <pattern id="stripe" patternUnits="userSpaceOnUse" width="20" height="20">
+      <rect width="10" height="20" fill="#e53e3e"></rect>
+      <rect x="10" width="10" height="20" fill="#fbd38d"></rect>
+    </pattern>
+  </defs>
+</svg>
