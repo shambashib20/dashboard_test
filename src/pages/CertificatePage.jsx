@@ -1,19 +1,176 @@
-import React, { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { authService } from "../services/auth.service";
+
+function formatINR(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const n = Number(String(value).replace(/[^0-9.-]/g, ""));
+  if (isNaN(n)) return value;
+  return "₹" + n.toLocaleString("en-IN");
+}
+
+function sanitizeHtmlString(html) {
+  if (!html || typeof html !== "string") return "";
+  // quick fixes: replace `""` attributes or stray quote sequences
+  // Fixes like: <td ... font-size: 11px; text-align:left"">  (extra quote)
+  html = html.replace(/"">/g, '">');
+  // Ensure closing tags for some known tag mistakes (very naive)
+  html = html.replace(/<tr([^>]*)>\s*<\/tr>/g, (m) => m); // noop but keeps pattern
+  return html;
+}
 
 /**
- * CertificatePage
- * - expects sidebar to be already present in layout.
- * - shows a list of certificate cards in center area, opens modal with HTML preview,
- *   and downloads PDF of the preview using html2canvas + jsPDF.
- *
- * Usage: drop this component into your page where the sidebar exists.
+ * Inject the student object values into template HTML.
+ * You can extend the mapping with additional placeholders your templates use.
  */
+function formatOrDash(value) {
+  if (value === null || value === undefined || value === "" || value === "0")
+    return "-";
+  // Return already formatted if it contains a rupee symbol
+  try {
+    const s = String(value).trim();
+    if (s.indexOf("₹") >= 0) return s;
+    const n = Number(s.replace(/[^0-9.-]/g, ""));
+    if (isNaN(n)) return s;
+    return "₹" + n.toLocaleString("en-IN");
+  } catch {
+    return String(value);
+  }
+}
 
-const college = JSON.parse(localStorage.getItem("student"))?.admission_bills;
+function injectStudentIntoHtml(rawHtml = "", student = {}) {
+  if (!rawHtml || typeof rawHtml !== "string") return "";
+  let html = sanitizeHtmlString(rawHtml);
 
-console.log(college);
+  // ensure semester_bills is an array
+  const semBills = Array.isArray(student?.semester_bills)
+    ? student.semester_bills
+    : [];
+
+  // basic map for common placeholders
+  const map = {
+    "{{STUDENTNAME}}": student.name || "",
+    "{{PHONE}}": student.phone || student.phone_number || "",
+    "{{ADMISSION_DATE}}": student.admission_date || student.created_date || "",
+    "{{FORM_NUMBER}}": student.form_number || student.id || "",
+    "{{STUDENT_ID}}": student.student_id || "",
+    "{{COURSENAME}}": student.courses?.course_name || "",
+    "{{COLLEGE}}": student.colleges?.college_name || "",
+    "{{SESSION}}": student.session || "",
+    "{{ADMISSION_FEES}}": formatINR(student.admission_fees),
+    "{{ADMISSION_FEES_WORD}}": student.admission_word || "",
+    "{{COURSEFEE}}": formatINR(student.course_fees) || "-",
+    "{{COURSEFEESWORD}}": student.course_word || "",
+    "{{ADDRESS}}": student.address || "",
+    "{{FATHERNAME}}": student.g_name || "",
+    "{{GUARDIAN_PHONE}}": student.g_phone || "",
+  };
+
+  // Add semester amount placeholders {{SEM1}}..{{SEM8}} and tuition placeholders {{SEMnTUTIONFEE}}
+  // Build lookup by sem_num first
+  const semLookup = {};
+  semBills.forEach((sb) => {
+    if (!sb) return;
+    const num = Number(sb.sem_num);
+    if (!isNaN(num) && num >= 1 && num <= 8) {
+      semLookup[num] = sb; // keep full object for further use (amount, due date, etc.)
+    }
+  });
+
+  for (let i = 1; i <= 8; i++) {
+    const sb = semLookup[i];
+    // SEMn -> formatted sem_amount or '-'
+    map[`{{SEM${i}}}`] = sb ? formatINR(sb.sem_amount) : "-";
+
+    // SEMnTUTIONFEE -> 75% of sem_amount (formatted) or '-'
+    if (sb && sb.sem_amount) {
+      const raw = Number(String(sb.sem_amount).replace(/[^0-9.-]/g, ""));
+      if (!isNaN(raw) && raw > 0) {
+        const seventyFive = Math.round(raw * 0.75); // rounded to integer rupees
+        const twelve = Math.round(raw * 0.12);
+        const eight = Math.round(raw * 0.12);
+        const five = Math.round(raw * 0.12);
+
+        map[`{{SEM${i}TUTIONFEE}}`] = "₹" + seventyFive.toLocaleString("en-IN");
+        map[`{{SEM${i}EQ}}`] = "₹" + twelve.toLocaleString("en-IN");
+        map[`{{SEM${i}BOOK}}`] = "₹" + eight.toLocaleString("en-IN");
+        map[`{{SEM${i}OTH}}`] = "₹" + five.toLocaleString("en-IN");
+      } else {
+        map[`{{SEM${i}TUTIONFEE}}`] = "-";
+        map[`{{SEM${i}EQ}}`] = "-";
+        map[`{{SEM${i}BOOK}}`] = "-";
+        map[`{{SEM${i}OTH}}`] = "-";
+      }
+    } else {
+      map[`{{SEM${i}TUTIONFEE}}`] = "-";
+      map[`{{SEM${i}EQ}}`] = "-";
+      map[`{{SEM${i}BOOK}}`] = "-";
+      map[`{{SEM${i}OTH}}`] = "-";
+    }
+  }
+
+  // Perform replacements (split/join to replace all occurrences)
+  Object.keys(map).forEach((key) => {
+    html = html.split(key).join(map[key]);
+  });
+
+  // Legacy: replace literal 'ddddd' if present
+  html = html
+    .split("{{ADMISSION_FEES}}")
+    .join(formatINR(student.admission_fees));
+
+  return html;
+}
+
+/**
+ * Enhanced wait for images (tries to set crossOrigin where possible).
+ * Accepts a parent container element.
+ */
+async function waitForImagesToLoadAdvanced(container, timeout = 5000) {
+  const imgs = Array.from(container.querySelectorAll("img"));
+  if (!imgs.length) return;
+  await Promise.all(
+    imgs.map(
+      (img) =>
+        new Promise((res) => {
+          // attempt to set crossOrigin if image src looks external
+          try {
+            if (
+              !img.crossOrigin &&
+              img.src &&
+              img.src.startsWith(window.location.origin) === false
+            ) {
+              img.crossOrigin = "anonymous";
+            }
+          } catch (e) {
+            // ignore if cannot set
+          }
+          if (img.complete && img.naturalWidth !== 0) return res();
+          const onDone = () => {
+            cleanup();
+            res();
+          };
+          const onErr = () => {
+            cleanup();
+            res(); // resolve anyway so we still generate the PDF even if an image fails
+          };
+          const cleanup = () => {
+            img.removeEventListener("load", onDone);
+            img.removeEventListener("error", onErr);
+          };
+          img.addEventListener("load", onDone);
+          img.addEventListener("error", onErr);
+
+          // safety timeout for images that never fire load/error
+          setTimeout(() => {
+            cleanup();
+            res();
+          }, timeout);
+        })
+    )
+  );
+}
 
 const sampleDocs = [
   {
@@ -30,19 +187,19 @@ const sampleDocs = [
   <!-- Centered title -->
   <div style="position: absolute; top: 0px; left: 0; text-align: center; width:100%">
   <h4 style=" text-align:right; margin-top:150px; width: 610px; margin-inline:auto"> <strong> Date – 10/12/2024</strong></h4>
-    <h3 style="margin: 0; font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-top:40px;  text-decoration: underline;">
+    <h3 style="margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-top:40px;  text-decoration: underline;">
       ADMISSION CONFIRMATION LETTER
     </h3>
-    <p style="margin-top:30px; text-align:justify; font-size:14px;  width: 610px; margin-inline:auto">This is to certify that <strong> Miss. Suparna Mondal</strong>, daughter of <strong> Mr. Ramsankar Mondal</strong>, has been admitted to the <strong> B.Sc Nursing Course</strong> at our institution for the academic session <strong> 2024-2028</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
+    <p style="margin-top:30px; text-align:justify;  width: 610px; margin-inline:auto">This is to certify that <strong> {{STUDENTNAME}}</strong>, daughter of <strong> {{FATHERNAME}}</strong>, has been admitted to the <strong>{{COURSENAME}}</strong> at our institution for the academic session <strong>{{SESSION}}</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
 
-    <p style="text-align: start; margin-top: 10px;  width: 610px; font-size:14px; margin-inline:auto"><strong>Course Fee Structure:</strong></p>
+    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto"><strong>Course Fee Structure:</strong></p>
 
-    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto;  
-        font-size:14px; ">The total fee for the entire four-years <strong> B.Sc Nursing Course </strong> program is <strong>Rs. 6,00,000/- (Rupees Six Lakhs Only),</strong> payable as per the following schedule:</p>
-
+    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto" >The total fee for the entire four-years <strong> {{COURSENAME}}</strong> program is <strong>Rs. {{COURSEFEE}} (Rupees {{COURSEFEESWORD}}),</strong> payable as per the following schedule:</p>
 
 
-    <div style="width: 730px; margin: 30px 5px 0 auto; ">
+
+    <div style="    width: 730px;
+    margin: 30px 5px 0 auto; ">
     
 
     <!-- Table -->
@@ -71,71 +228,73 @@ const sampleDocs = [
         <!-- Admission Fees row -->
         <tr>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px">Admission Fee</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px">ddddd</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px"></td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{ADMISSION_FEES}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM1}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM2}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM3}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM4}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM5}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM6}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM7}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM8}}</td>
         </tr>
 
         <!-- Tuition Fees row -->
         <tr>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px">Tuition Fees</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">-</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM1TUTIONFEE}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM2TUTIONFEE}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM3TUTIONFEE}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM4TUTIONFEE}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM5TUTIONFEE}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM6TUTIONFEE}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM7TUTIONFEE}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM8TUTIONFEE}}</td>
         </tr>
 
         <!-- Equipment & Computer -->
         <tr>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Equipment &amp; Computer</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">-</td>
+           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM1EQ}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM2EQ}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM3EQ}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM4EQ}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM5EQ}}</td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM6EQ}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM7EQ}}</td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM8EQ}}</td>
         </tr>
 
         <!-- Book & Stationery -->
         <tr>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Book &amp; Stationery</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">-</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM1BOOK}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM2BOOK}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM3BOOK}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM4BOOK}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM5BOOK}}</td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM6BOOK}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM7BOOK}}</td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM8BOOK}}</td>
         </tr>
 
         <!-- Others Fees -->
         <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Others Fees Payable to Institute</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
+         <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">  Others Fees Payable to Institute</td>
+      
+           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">-</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM1OTH}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM2OTH}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM3OTH}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM4OTH}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM5OTH}}</td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM6OTH}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM7OTH}}</td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM8OTH}}</td>
         </tr>
 
-        <!-- Hostel -->
-        <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Hostel</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-        </tr>
-
+      
         <!-- Total -->
         <tr>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Total</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td><td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"></td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">{{COURSEFEE}}</td>
+           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM1}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM2}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM3}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM4}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM5}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM6}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM7}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM8}}</td>
         </tr>
 
         <!-- Grand total row spanning columns -->
@@ -251,7 +410,7 @@ const sampleDocs = [
   </p>
 
   <p style="margin:0 0 16px 0; text-align:left; ">
-    With due respect, I would like to inform you that <strong>${college?.college_name}</strong> 
+    With due respect, I would like to inform you that <strong>${"underfined"}</strong> 
     has obtained <strong>NOC, Recognition, Affiliation, and Subaffiliation</strong> from the <strong>Government of 
     West Bengal, West Bengal Nursing Council (WBNC), West Bengal University of Health Sciences (WBUHS), 
     and Indian Nursing Council (INC)</strong> to conduct the <strong>GNM and B.Sc. Nursing courses</strong> from the academic 
@@ -315,24 +474,47 @@ const sampleDocs = [
     thumbnail: null,
   },
 ];
-function waitForImagesToLoad(container) {
-  const imgs = Array.from(container.querySelectorAll("img"));
-  if (!imgs.length) return Promise.resolve();
-  return Promise.all(
-    imgs.map((img) => {
-      return new Promise((res) => {
-        if (img.complete) return res();
-        img.onload = () => res();
-        img.onerror = () => res(); // resolve even if error (we'll still try)
-      });
-    })
-  );
-}
+
 export default function CertificatePage() {
-  const [docs] = useState(sampleDocs);
+  const [docs, setDocs] = useState(sampleDocs);
   const [selected, setSelected] = useState(null); // {id, title, pages}
   const [isOpen, setIsOpen] = useState(false);
   const previewRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadStudent = async () => {
+      try {
+        const raw = localStorage.getItem("student");
+        if (!raw) throw new Error("No student in localStorage");
+
+        const localData = JSON.parse(raw);
+        const phone = localData.phone_number || localData.phone;
+
+        if (!phone) throw new Error("Phone number missing");
+
+        const response = await authService.student_details({
+          mobile_number: phone,
+        });
+        const resolvedStudent = response.data.student || {};
+        setDocs((prev) =>
+          prev.map((doc) => ({
+            ...doc,
+            pages: doc.pages.map((p) =>
+              injectStudentIntoHtml(p, resolvedStudent)
+            ),
+          }))
+        );
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStudent();
+  }, []);
 
   const openModal = (doc) => {
     setSelected(doc);
@@ -390,7 +572,7 @@ export default function CertificatePage() {
 
         // Wait a bit for layout to stabilize
         await new Promise((resolve) => setTimeout(resolve, 100));
-        await waitForImagesToLoad(wrapper);
+        await waitForImagesToLoadAdvanced(wrapper);
 
         const canvas = await html2canvas(wrapper, {
           scale: 2,
