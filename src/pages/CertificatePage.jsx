@@ -11,7 +11,7 @@ import jsPDF from "jspdf";
  * Usage: drop this component into your page where the sidebar exists.
  */
 
-const college = JSON.parse(localStorage.getItem("student"))?.colleges;
+const college = JSON.parse(localStorage.getItem("student"))?.admission_bills;
 
 console.log(college);
 
@@ -30,19 +30,19 @@ const sampleDocs = [
   <!-- Centered title -->
   <div style="position: absolute; top: 0px; left: 0; text-align: center; width:100%">
   <h4 style=" text-align:right; margin-top:150px; width: 610px; margin-inline:auto"> <strong> Date – 10/12/2024</strong></h4>
-    <h3 style="margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-top:40px;  text-decoration: underline;">
+    <h3 style="margin: 0; font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-top:40px;  text-decoration: underline;">
       ADMISSION CONFIRMATION LETTER
     </h3>
-    <p style="margin-top:30px; text-align:justify;  width: 610px; margin-inline:auto">This is to certify that <strong> Miss. Suparna Mondal</strong>, daughter of <strong> Mr. Ramsankar Mondal</strong>, has been admitted to the <strong> B.Sc Nursing Course</strong> at our institution for the academic session <strong> 2024-2028</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
+    <p style="margin-top:30px; text-align:justify; font-size:14px;  width: 610px; margin-inline:auto">This is to certify that <strong> Miss. Suparna Mondal</strong>, daughter of <strong> Mr. Ramsankar Mondal</strong>, has been admitted to the <strong> B.Sc Nursing Course</strong> at our institution for the academic session <strong> 2024-2028</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
 
-    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto"><strong>Course Fee Structure:</strong></p>
+    <p style="text-align: start; margin-top: 10px;  width: 610px; font-size:14px; margin-inline:auto"><strong>Course Fee Structure:</strong></p>
 
-    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto" >The total fee for the entire four-years <strong> B.Sc Nursing Course </strong> program is <strong>Rs. 6,00,000/- (Rupees Six Lakhs Only),</strong> payable as per the following schedule:</p>
+    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto;  
+        font-size:14px; ">The total fee for the entire four-years <strong> B.Sc Nursing Course </strong> program is <strong>Rs. 6,00,000/- (Rupees Six Lakhs Only),</strong> payable as per the following schedule:</p>
 
 
 
-    <div style="    width: 730px;
-    margin: 30px 5px 0 auto; ">
+    <div style="width: 730px; margin: 30px 5px 0 auto; ">
     
 
     <!-- Table -->
