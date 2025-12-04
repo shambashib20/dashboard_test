@@ -39,12 +39,26 @@ class AuthService {
     }
   }
 
-  async login({ email, password, phone_number }) {
+  async login({ password, phone_number }) {
     try {
       const response = await this.api.post("/auth/login", {
-        email,
+
         password,
         phone_number,
+      });
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data) {
+        throw new Error(error.response.data.message || "Login failed");
+      }
+      throw new Error("Network error, please try again");
+    }
+  }
+
+  async student_details({ mobile_number }) {
+    try {
+      const response = await this.api.post("/auth/student-details", {
+        mobile_number,
       });
       return response.data;
     } catch (error) {

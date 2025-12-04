@@ -1,4 +1,5 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { authService } from "../services/auth.service";
 
 /* ----------------------- tiny utils ----------------------- */
 const Safe = (v) => (v ? v : "—");
@@ -50,18 +51,14 @@ function DocumentCard({ title, url, createdAt }) {
   const ext = getExt(url);
   const fileUrl = `${import.meta.env.VITE_EXTERNAL_API}${url}`;
 
-
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(fileUrl);
-    } catch {
-      // ignore
-    }
+    } catch { }
   };
 
   return (
-    <div className="group relative overflow-hidden  border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-      {/* preview area with fixed aspect ratio */}
+    <div className="group relative overflow-hidden border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="relative aspect-[4/3] w-full bg-gray-50">
         {isPdf(url) ? (
           <iframe
@@ -78,7 +75,6 @@ function DocumentCard({ title, url, createdAt }) {
           />
         )}
 
-        {/* top overlay */}
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-3">
           <DocTypeBadge ext={ext} />
           <div className="rounded-full bg-black/40 px-2 py-1 text-[10px] font-medium text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
@@ -87,14 +83,11 @@ function DocumentCard({ title, url, createdAt }) {
         </div>
       </div>
 
-      {/* meta + actions */}
       <div className="flex flex-col gap-2 p-4">
         <h3 className="line-clamp-1 text-[15px] font-semibold text-[#032768]">
           {Safe(title) || "Untitled Document"}
         </h3>
-        <p className="text-xs text-gray-500">
-          Uploaded on: {fmtDate(createdAt)}
-        </p>
+        <p className="text-xs text-gray-500">Uploaded on: {fmtDate(createdAt)}</p>
 
         <div className="mt-1 flex items-center gap-2">
           <a
@@ -106,6 +99,7 @@ function DocumentCard({ title, url, createdAt }) {
             <IconFile className="h-4 w-4 text-white" />
             View
           </a>
+
           <a
             href={fileUrl}
             download
@@ -113,11 +107,10 @@ function DocumentCard({ title, url, createdAt }) {
           >
             Download
           </a>
+
           <button
             onClick={copyLink}
             className="inline-flex items-center justify-center rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-            aria-label="Copy link"
-            title="Copy link"
           >
             Copy
           </button>
@@ -129,18 +122,63 @@ function DocumentCard({ title, url, createdAt }) {
 
 /* ----------------------- page ----------------------- */
 function DocumentsPage() {
-  // get student object from localStorage safely
-  let student = null;
-  try {
-    const raw = localStorage.getItem("student");
-    student = raw ? JSON.parse(raw) : null;
-  } catch {
-    student = null;
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // SAME LOGIC AS DASHBOARD + PAYMENT STATUS
+  useEffect(() => {
+    const loadStudent = async () => {
+      try {
+        const raw = localStorage.getItem("student");
+        if (!raw) throw new Error("No student in localStorage");
+
+        const localData = JSON.parse(raw);
+        const phone = localData.phone_number || localData.phone;
+
+        if (!phone) throw new Error("Phone number missing");
+
+        const response = await authService.student_details({
+          mobile_number: phone,
+        });
+
+        const freshStudent = response.data.student;
+
+        // Update localStorage with new data
+        localStorage.setItem("student", JSON.stringify(freshStudent));
+
+        setStudent(freshStudent);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStudent();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <h2 className="text-gray-600 text-lg">Loading documents…</h2>
+      </div>
+    );
+  }
+
+  if (error || !student) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center text-center">
+        <div className="p-6 bg-white rounded-lg shadow-md text-red-600">
+          {error || "Unable to load student documents"}
+        </div>
+      </div>
+    );
   }
 
   const docs = student?.documents || [];
 
-  if (!student || docs.length === 0) {
+  if (docs.length === 0) {
     return (
       <div className="flex h-[70vh] flex-col items-center justify-center text-center">
         <div className="mb-3 rounded-2xl bg-blue-50 px-3 py-1 text-xs font-semibold text-[#032768]">
@@ -158,7 +196,7 @@ function DocumentsPage() {
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8 bg-gray-50 py-7">
-      <div className="mb-6 flex items-end justify-between ">
+      <div className="mb-6 flex items-end justify-between">
         <div>
           <h2 className="text-3xl font-bold text-[#032768]">
             Your Uploaded Documents
@@ -168,6 +206,7 @@ function DocumentsPage() {
             with native controls.
           </p>
         </div>
+
         <div className="hidden gap-2 sm:flex">
           <a
             href="/documents/upload"

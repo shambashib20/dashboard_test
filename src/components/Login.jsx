@@ -31,11 +31,18 @@ function Login() {
     try {
       const res = await authService.login(formData);
       const { token, student } = res.data;
+
       if (token) {
         localStorage.setItem("token", token);
         localStorage.setItem("student", JSON.stringify(student));
+
+        const details = await authService.student_details({
+          mobile_number: student.phone_number,
+        });
+
+        console.log("Student details:", details);
+        navigate("/dashboard");
       }
-      navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
