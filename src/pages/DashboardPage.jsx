@@ -9,6 +9,7 @@ import {
   GiftOutlined,
 } from "@ant-design/icons";
 import { authService } from "../services/auth.service";
+import GlobalLoader from "../components/GlobalLoader";
 
 /* --------------------------- utils --------------------------- */
 const formatDate = (d) => {
@@ -69,9 +70,7 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <h2 className="text-gray-600 text-lg">Loading your dashboard…</h2>
-      </div>
+      <GlobalLoader />
     );
   }
 

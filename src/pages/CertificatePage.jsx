@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { authService } from "../services/auth.service";
+import GlobalLoader from "../components/GlobalLoader";
 
 function formatINR(value) {
   if (value === null || value === undefined || value === "") return "—";
@@ -650,6 +651,12 @@ export default function CertificatePage() {
       alert("PDF generation failed. Check console for details.");
     }
   };
+
+  if (loading) {
+    return (
+      <GlobalLoader />
+    );
+  }
 
   return (
     <div style={styles.container}>
