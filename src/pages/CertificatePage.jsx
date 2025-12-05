@@ -39,6 +39,14 @@ function formatOrDash(value) {
   }
 }
 
+function formatTodayDate() {
+  const d = new Date();
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
 function injectStudentIntoHtml(rawHtml = "", student = {}) {
   if (!rawHtml || typeof rawHtml !== "string") return "";
   let html = sanitizeHtmlString(rawHtml);
@@ -66,6 +74,7 @@ function injectStudentIntoHtml(rawHtml = "", student = {}) {
     "{{FATHERNAME}}": student.g_name || "",
     "{{GUARDIAN_PHONE}}": student.g_phone || "",
     "{{GRANDTOTAL}}": formatINR(student.course_fees) || "-",
+    "{{TODAYDATE}}": formatTodayDate(),
   };
 
   // Add semester amount placeholders {{SEM1}}..{{SEM8}} and tuition placeholders {{SEMnTUTIONFEE}}
@@ -187,18 +196,18 @@ const sampleDocs = [
 
   <!-- Centered title -->
   <div style="position: absolute; top: 0px; left: 0; text-align: center; width:100%">
-  <h4 style=" text-align:right; margin-top:150px; width: 610px; margin-inline:auto"> <strong> Date – 10/12/2024</strong></h4>
+  <h4 style=" text-align:right; margin-top:150px; width: 610px; margin-inline:auto"> <strong> Date – {{TODAYDATE}}</strong></h4>
     <h3 style="margin: 0; font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-top:40px;  text-decoration: underline;">
       ADMISSION CONFIRMATION LETTER
     </h3>
-    <p style="margin-top:30px; text-align:justify;  width: 610px; margin-inline:auto ;font-size: 14px;">This is to certify that <strong> {{STUDENTNAME}}</strong>, daughter of <strong> {{FATHERNAME}}</strong>, has been admitted to the <strong>{{COURSENAME}}</strong> at our institution for the academic session <strong>{{SESSION}}</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
+    <p style="margin-top:30px; text-align:justify;  width: 610px; margin-inline:auto ;font-size: 14px;">This is to certify that <strong> {{STUDENTNAME}}</strong>, daughter of <strong>Mr. {{FATHERNAME}}</strong>, has been admitted to the <strong>{{COURSENAME}}</strong> at our institution for the academic session <strong>{{SESSION}}</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
 
     <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto; font-size: 14px;"><strong>Course Fee Structure:</strong></p>
 
     <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto; font-size: 14px;" >The total fee for the entire four-years <strong> {{COURSENAME}}</strong> program is <strong>Rs. {{COURSEFEE}} (Rupees {{COURSEFEESWORD}}),</strong> payable as per the following schedule:</p>
 
 
-s
+
     <div style="    width: 730px;
     margin: 30px 5px 0 auto; ">
     
@@ -212,7 +221,7 @@ s
         </th>
       </tr>
       <tr>
-        <th style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px; vertical-align:bottom;">Particulars</th>
+        <th style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:left;font-size:12px; vertical-align:bottom;">Particulars</th>
         <th style="border:1px solid #111;padding:0px 2px 8px;font-size:11px;text-align:center; font-weight:100; vertical-align:bottom;">Admission</th>
         <th style="border:1px solid #111;padding:0px 2px 8px;font-size:11px;text-align:center; font-weight:100; vertical-align:bottom;">1st<span style="display:block">Semester</span></th>
         <th style="border:1px solid #111;padding:0px 2px 8px;font-size:11px;text-align:center; font-weight:100; vertical-align:bottom;">2nd<span style="display:block">Semester</span></th>
@@ -228,7 +237,7 @@ s
       <tbody>
         <!-- Admission Fees row -->
         <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px">Admission Fee</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px">Admission Fee</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{ADMISSION_FEES}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM1}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM2}}</td>
@@ -239,7 +248,7 @@ s
 
         <!-- Tuition Fees row -->
         <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:left;font-size:12px">Tuition Fees</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:100;text-align:left;font-size:12px">Tuition Fees</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">-</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM1TUTIONFEE}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; text-align:center; font-weight:300;text-align:center;font-size:12px">{{SEM2TUTIONFEE}}</td>
@@ -251,7 +260,7 @@ s
 
         <!-- Equipment & Computer -->
         <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Equipment &amp; Computer</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:left;font-size:12px">Equipment &amp; Computer</td>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">-</td>
            <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM1EQ}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM2EQ}}</td>
@@ -263,7 +272,7 @@ s
 
         <!-- Book & Stationery -->
         <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Book &amp; Stationery</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:left;font-size:12px">Book &amp; Stationery</td>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">-</td>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM1BOOK}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:300;text-align:center;font-size:12px">{{SEM2BOOK}}</td>
@@ -275,7 +284,7 @@ s
 
         <!-- Others Fees -->
         <tr>
-         <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">  Others Fees Payable to Institute</td>
+         <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:left;font-size:12px">  Others Fees Payable to Institute</td>
       
            <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">-</td>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:center;font-size:12px">{{SEM1OTH}}</td>
@@ -289,7 +298,7 @@ s
       
         <!-- Total -->
         <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Total</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:100;text-align:left;font-size:12px">Total</td>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">{{ADMISSION_FEES}}</td>
            <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM1}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM2}}</td>
@@ -301,7 +310,7 @@ s
         <!-- Grand total row spanning columns -->
 
 <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Grand Total</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px"><strong style=font-weight:900>Grand Total</strong></td>
           <td colspan="9" style= border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:900; text-align:center;font-size:12px"><strong style=font-weight:900>{{COURSEFEE}}</strong></td>
 
 
@@ -320,6 +329,8 @@ s
 
 </div>
 `,
+
+      // page 2
       `<div class="certificate-page" 
      style="position: relative; box-sizing: border-box; border:1px ; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
 
@@ -382,22 +393,22 @@ s
 
 </div>
 `,
-      `<div class="certificate-page" 
+
+      //page 3
+      `<div class="certificate-page"
      style="position: relative; box-sizing: border-box; border:1px; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
 
   <!-- Background image -->
-  <img src="/id_cards/template1.jpg" 
+  <img src="/id_cards/template1.jpg"
        style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
 
   <!-- Centered title -->
   <div style="position: absolute; top: 0px; left: 0; text-align: center; width:100%">
- 
-<div style=" font-size:11pt; line-height:1.5; margin-top:150px; width: 610px; margin-inline:auto">
+
+<div style=" font-size:11pt; line-height:1.5; margin-top:185px; width: 610px; margin-inline:auto">
 
   <!-- DATE -->
-  <p style="text-align:right; margin:0 0 20px 0; font-weight:600;">
-   Date: 10-12-2024
-  </p>
+
 
   <!-- ADDRESS -->
   <p style="margin:0 0 16px 0; text-align:left; font-weight:600;">
@@ -484,7 +495,7 @@ s
 
 export default function CertificatePage() {
   const [docs, setDocs] = useState(sampleDocs);
-  const [selected, setSelected] = useState(null); // {id, title, pages}
+  const [selected, setSelected] = useState(null); 
   const [isOpen, setIsOpen] = useState(false);
   const previewRef = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -505,12 +516,28 @@ export default function CertificatePage() {
           mobile_number: phone,
         });
         const resolvedStudent = response.data.student || {};
+        const TEMPLATE_MAP = {
+          "Mother Teresa Institute of Nursing": "/id_cards/template4.jpeg",
+          "Mother Rijiya Institute of Nursing": "/id_cards/template2.jpeg",
+          "M.R Institute of Nursing": "/id_cards/template3.jpeg",
+
+          default: "/id_cards/template1.jpg",
+        };
+
+        const collegeName = resolvedStudent?.colleges?.college_name?.trim();
+        const templateImage =
+          TEMPLATE_MAP[collegeName] || TEMPLATE_MAP.default;
+
         setDocs((prev) =>
           prev.map((doc) => ({
             ...doc,
-            pages: doc.pages.map((p) =>
-              injectStudentIntoHtml(p, resolvedStudent)
-            ),
+            pages: doc.pages.map((p) => {
+              const updated = p.replace(
+                /\/id_cards\/template1\.jpg/g,
+                templateImage
+              );
+              return injectStudentIntoHtml(updated, resolvedStudent);
+            }),
           }))
         );
       } catch (err) {
