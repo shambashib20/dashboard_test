@@ -179,7 +179,7 @@ const sampleDocs = [
     title: "Experience Letter (multi-page)",
     pages: [
       `<div class="certificate-page" 
-     style="position: relative; box-sizing: border-box; border:1px solid red; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
+     style="position: relative; box-sizing: border-box; border:1px; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
 
   <!-- Background image -->
   <img src="/id_cards/template1.jpg" 
@@ -198,7 +198,7 @@ const sampleDocs = [
     <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto; font-size: 14px;" >The total fee for the entire four-years <strong> {{COURSENAME}}</strong> program is <strong>Rs. {{COURSEFEE}} (Rupees {{COURSEFEESWORD}}),</strong> payable as per the following schedule:</p>
 
 
-
+s
     <div style="    width: 730px;
     margin: 30px 5px 0 auto; ">
     
@@ -321,7 +321,7 @@ const sampleDocs = [
 </div>
 `,
       `<div class="certificate-page" 
-     style="position: relative; box-sizing: border-box; border:1px solid red; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
+     style="position: relative; box-sizing: border-box; border:1px ; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
 
   <!-- Background image -->
   <img src="/id_cards/template1.jpg" 
@@ -383,7 +383,7 @@ const sampleDocs = [
 </div>
 `,
       `<div class="certificate-page" 
-     style="position: relative; box-sizing: border-box; border:1px solid red; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
+     style="position: relative; box-sizing: border-box; border:1px; font-family: Georgia, serif; background: white; width: 794px; height: 1123px;">
 
   <!-- Background image -->
   <img src="/id_cards/template1.jpg" 
@@ -668,15 +668,7 @@ export default function CertificatePage() {
                 <button style={styles.openBtn} onClick={() => openModal(doc)}>
                   Open
                 </button>
-                <button
-                  style={styles.smallBtn}
-                  onClick={() => {
-                    setSelected(doc);
-                    downloadPDF();
-                  }}
-                >
-                  Download
-                </button>
+
               </div>
             </div>
           </div>
