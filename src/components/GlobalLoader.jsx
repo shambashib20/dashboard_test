@@ -10,7 +10,7 @@ export default function GlobalLoader() {
 
                 {/* Logo */}
                 <img
-                    src="/src/assets/fab.png"
+                    src="../assets/fab.png"
                     alt="Loading..."
                     className="w-16 h-16 animate-pulse drop-shadow-md"
                 />
