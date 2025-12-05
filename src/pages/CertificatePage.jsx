@@ -65,6 +65,7 @@ function injectStudentIntoHtml(rawHtml = "", student = {}) {
     "{{ADDRESS}}": student.address || "",
     "{{FATHERNAME}}": student.g_name || "",
     "{{GUARDIAN_PHONE}}": student.g_phone || "",
+    "{{GRANDTOTAL}}": formatINR(student.course_fees) || "-",
   };
 
   // Add semester amount placeholders {{SEM1}}..{{SEM8}} and tuition placeholders {{SEMnTUTIONFEE}}
@@ -187,14 +188,14 @@ const sampleDocs = [
   <!-- Centered title -->
   <div style="position: absolute; top: 0px; left: 0; text-align: center; width:100%">
   <h4 style=" text-align:right; margin-top:150px; width: 610px; margin-inline:auto"> <strong> Date – 10/12/2024</strong></h4>
-    <h3 style="margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-top:40px;  text-decoration: underline;">
+    <h3 style="margin: 0; font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-top:40px;  text-decoration: underline;">
       ADMISSION CONFIRMATION LETTER
     </h3>
-    <p style="margin-top:30px; text-align:justify;  width: 610px; margin-inline:auto">This is to certify that <strong> {{STUDENTNAME}}</strong>, daughter of <strong> {{FATHERNAME}}</strong>, has been admitted to the <strong>{{COURSENAME}}</strong> at our institution for the academic session <strong>{{SESSION}}</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
+    <p style="margin-top:30px; text-align:justify;  width: 610px; margin-inline:auto ;font-size: 14px;">This is to certify that <strong> {{STUDENTNAME}}</strong>, daughter of <strong> {{FATHERNAME}}</strong>, has been admitted to the <strong>{{COURSENAME}}</strong> at our institution for the academic session <strong>{{SESSION}}</strong>. Her admission has been granted under a merit seat as per the guidelines and permission of the <strong> Department of Health and Family Welfare, Government of West Bengal</strong>, and the norms set by the <strong> West Bengal Nursing Council</strong> and the <strong>Indian Nursing Council</strong></p>
 
-    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto"><strong>Course Fee Structure:</strong></p>
+    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto; font-size: 14px;"><strong>Course Fee Structure:</strong></p>
 
-    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto" >The total fee for the entire four-years <strong> {{COURSENAME}}</strong> program is <strong>Rs. {{COURSEFEE}} (Rupees {{COURSEFEESWORD}}),</strong> payable as per the following schedule:</p>
+    <p style="text-align: start; margin-top: 10px;  width: 610px; margin-inline:auto; font-size: 14px;" >The total fee for the entire four-years <strong> {{COURSENAME}}</strong> program is <strong>Rs. {{COURSEFEE}} (Rupees {{COURSEFEESWORD}}),</strong> payable as per the following schedule:</p>
 
 
 
@@ -203,7 +204,7 @@ const sampleDocs = [
     
 
     <!-- Table -->
-     <table  role="table" style="width:100%;border-collapse:collapse;table-layout:fixed;border:3px solid #111;background:rgba(255,255,255,0.95);">
+     <table  role="table" style="width:100%;border-collapse:collapse;table-layout:fixed;border:3px solid #111;background:transparent;">
     <thead>
       <tr>
         <th colspan="10" style="border: 1px solid #111; vertical-align: middle; padding-bottom:8px; padding-top:0; text-align: center; font-size: 18px; font-weight: 800;">
@@ -289,7 +290,7 @@ const sampleDocs = [
         <!-- Total -->
         <tr>
           <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Total</td>
-          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">{{COURSEFEE}}</td>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:center;font-size:12px">{{ADMISSION_FEES}}</td>
            <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM1}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM2}}</td>
           <td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM3}}</td><td style="border:1px solid #111;padding:0px 5px 8px  ;width:120px; font-weight:700;text-align:center;font-size:12px">{{SEM4}}</td>
@@ -298,10 +299,16 @@ const sampleDocs = [
         </tr>
 
         <!-- Grand total row spanning columns -->
-        <tr>
-          <td style="border:1px solid #111;padding:0px 5px 8px ;font-weight:700; font-size: 11px; text-align:left"">GRAND TOTAL</td>
-          <td colspan="9" style="border:1px solid #111;padding:0px 5px 8px;text-align:center;font-weight:700;></td>
+
+<tr>
+          <td style="border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:700;text-align:left;font-size:12px">Grand Total</td>
+          <td colspan="9" style= border:1px solid #111;padding:0px 5px 8px;width:120px; font-weight:900; text-align:center;font-size:12px"><strong style=font-weight:900>{{COURSEFEE}}</strong></td>
+
+
+
         </tr>
+
+
       </tbody>
     </table>
 
@@ -348,13 +355,13 @@ const sampleDocs = [
     </li>
   </ul>
 
-  <p style="margin:80px 0 12px 0;">
+  <p style="margin:80px 0 12px 0; font-size: 14px;">
     <strong>Eligibility:</strong>
     10+2 Science [P-C-B/P-C-M], aggregate 45% (English Mandatory),
     NEET/JENPAS Entrance Examination Rank Card (Mandatory).
   </p>
 
-  <p style="margin:20px 0 12px 0;">
+  <p style="margin:20px 0 12px 0; font-size: 14px;">
     <strong>Seat booking amount:</strong>
     Rs. 20,000/- (non-refundable). This amount will be adjusted
     against the admission fee.
@@ -774,7 +781,7 @@ const styles = {
     padding: "6px 10px",
     borderRadius: 6,
     border: "none",
-    background: "#ef4444",
+    background: "#2b6cb0",
     color: "white",
     cursor: "pointer",
   },
