@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import getPhotoUrl from "../utils/profile_photo_extractor.util";
 import { authService } from "../services/auth.service";
+import GlobalLoader from "../components/GlobalLoader";
 
-const Safe = (v) => (v ? v : "—");
+
 
 const IdCard = () => {
   const [student, setStudent] = useState(null);
@@ -45,9 +46,7 @@ const IdCard = () => {
   /* ---------------------------- LOADING HANDLERS ------------------------- */
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-600 text-lg">Loading your ID Card…</p>
-      </div>
+      <GlobalLoader />
     );
   }
 
@@ -108,23 +107,23 @@ const IdCard = () => {
   };
 
   const mapped = {
-    name: normalize(student?.name || ""),
-    roll: student?.roll_number || "",
-    course: student?.courses?.course_name || "",
-    session: student?.session || "",
-    phone: student?.phone || "",
-    guardian: student?.g_name || "",
-    gphone: student?.g_phone || "",
-    address: student?.address || "",
-    collegeName: (student?.colleges?.college_name || "").split(" ").join("_"),
+    name: normalize(student?.name || "—"),
+    roll: student?.roll_number || "—",
+    course: student?.courses?.course_name || "—",
+    session: student?.session || "—",
+    phone: student?.phone || "—",
+    guardian: student?.g_name || "—",
+    gphone: student?.g_phone || "—",
+    address: student?.address || "—",
+    collegeName: (student?.colleges?.college_name || "—").split(" ").join("_"),
     blood: student?.blood || "—",
     bgImage:
       bgImage[
-      (student?.colleges?.college_name || "").trim().replace(/\s+/g, "_")
+      (student?.colleges?.college_name || "—").trim().replace(/\s+/g, "_")
       ] || "/id_cards/MMIN.svg",
     color:
       colors[
-      (student?.colleges?.college_name || "").trim().replace(/\s+/g, "_")
+      (student?.colleges?.college_name || "—").trim().replace(/\s+/g, "_")
       ] || "#000000",
     profile_image: photoUrl,
   };

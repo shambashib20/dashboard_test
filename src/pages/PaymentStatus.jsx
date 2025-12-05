@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { authService } from "../services/auth.service";
+import GlobalLoader from "../components/GlobalLoader";
 
 function PaymentStatus() {
   const [activeTab, setActiveTab] = useState("installments");
@@ -38,9 +39,7 @@ function PaymentStatus() {
   // LOADING UI
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <h2 className="text-gray-600 text-lg">Loading payment details…</h2>
-      </div>
+      <GlobalLoader />
     );
   }
 
@@ -66,11 +65,28 @@ function PaymentStatus() {
 
       {/* Header */}
       <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-100">
-        <h2 className="text-3xl font-bold text-[#032768]">Payment Status</h2>
-        <p className="text-gray-600 mt-2">
-          View and manage your payment details
-        </p>
+        <div className="flex items-start justify-between">
+
+          {/* LEFT SIDE */}
+          <div className="flex-1 pr-6">
+            <h2 className="text-3xl font-bold text-[#032768]">Payment Status</h2>
+            <p className="text-gray-600 mt-2">
+              View and manage your payment details
+            </p>
+          </div>
+
+          {/* DIVIDER */}
+          <div className="w-px bg-gray-300 h-20 mx-4"></div>
+
+          {/* RIGHT SIDE */}
+          <div className="flex-1 pl-6 text-right">
+            <h3 className="text-3xl font-bold text-[#032768]">Course Fees</h3>
+            <p className="text-gray-600 text-2xl  mt-2">₹{student.course_fees}</p>
+          </div>
+
+        </div>
       </div>
+
 
       {/* Tabs */}
       <div className="flex space-x-1 bg-white p-2 rounded-lg shadow-sm border border-gray-100 mb-6">

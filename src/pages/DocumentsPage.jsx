@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { authService } from "../services/auth.service";
+import GlobalLoader from "../components/GlobalLoader";
 
 /* ----------------------- tiny utils ----------------------- */
 const Safe = (v) => (v ? v : "—");
@@ -160,9 +161,7 @@ function DocumentsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[70vh] items-center justify-center">
-        <h2 className="text-gray-600 text-lg">Loading documents…</h2>
-      </div>
+      <GlobalLoader />
     );
   }
 
