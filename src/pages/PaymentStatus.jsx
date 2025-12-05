@@ -203,7 +203,7 @@ function AdmissionsInstallments({ student }) {
 
                 <button
                   onClick={() => setSelectedInstallment(ins)}
-                  className="mt-4 px-4 py-2 bg-[#032768] text-white rounded-md"
+                  className="mt-4 px-4 py-2 bg-[#032768] text-white rounded-md cursor-pointer"
                 >
                   View Full Details
                 </button>
@@ -482,7 +482,7 @@ function SemesterPayments({ student }) {
                 </div>
 
                 <button
-                  className="mt-4 px-4 py-2 bg-[#032768] text-white rounded-md"
+                  className="mt-4 px-4 py-2 bg-[#032768] text-white rounded-md cursor-pointer"
                   onClick={() => setOpenModal(sem)}
                 >
                   View Complete Details
