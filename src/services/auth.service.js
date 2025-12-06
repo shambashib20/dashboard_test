@@ -69,6 +69,41 @@ class AuthService {
     }
   }
 
+  async student_profile({
+    student_name
+  }) {
+    try {
+      const response = await this.api.post("/auth/student-profile", {
+        student_name,
+      });
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data) {
+        throw new Error(error.response.data.message || "Profile fetch failed");
+      }
+      throw new Error("Network error, please try again");
+    }
+  }
+
+
+  async update_student_email({
+    student_name,
+    email
+  }) {
+    try {
+      const response = await this.api.put("/auth/student/update-email", {
+        student_name,
+        email
+      });
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data) {
+        throw new Error(error.response.data.message || "Profile fetch failed");
+      }
+      throw new Error("Network error, please try again");
+    }
+  }
+
   async forgotPassword({ email }) {
     try {
       const response = await this.api.post("/auth/forget-password", {
