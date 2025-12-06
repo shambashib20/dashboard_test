@@ -9,10 +9,11 @@ import {
     Tag,
     message,
 } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { fetchTicketsByStudent, createTicket } from "../services/ticket.service";
+import { fetchTicketsByStudent, createTicket, fetchTicketDetails } from "../services/ticket.service";
 
 const TicketSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
@@ -24,6 +25,10 @@ export default function StudentTickets() {
     const [open, setOpen] = useState(false);
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [ticketDetails, setTicketDetails] = useState(null);
+    const [detailsLoading, setDetailsLoading] = useState(false);
 
     const student = JSON.parse(localStorage.getItem("student"));
     const studentName = student?.name;
@@ -77,10 +82,28 @@ export default function StudentTickets() {
     // -------------------- Table Rows --------------------
     const ticketRows = tickets.map((t) => ({
         id: t.subject,
+        _id: t._id,
         title: t.title,
         status: t.status,
         createdAt: new Date(t.createdAt).toLocaleString(),
+        updatedAt: new Date(t.updatedAt).toLocaleString(),
     }));
+
+    const openTicketDetails = async (ticketId) => {
+        try {
+            setDetailsLoading(true);
+            setDetailsOpen(true);
+
+            const response = await fetchTicketDetails(ticketId);
+
+            setTicketDetails(response.data);
+        } catch (err) {
+            message.error("Failed to load ticket details!");
+            setDetailsOpen(false);
+        } finally {
+            setDetailsLoading(false);
+        }
+    };
 
     const columns = [
         { title: "Ticket ID", dataIndex: "id" },
@@ -95,6 +118,20 @@ export default function StudentTickets() {
             ),
         },
         { title: "Created At", dataIndex: "createdAt" },
+        { title: "Updated At", dataIndex: "updatedAt" },
+        {
+            title: "Action",
+            render: (_, record) => (
+                <Button
+                    type="link"
+                    icon={<EyeOutlined />}
+                    style={{ color: "#032768", fontWeight: "600" }}
+                    onClick={() => openTicketDetails(record._id)}
+                >
+
+                </Button>
+            )
+        }
     ];
 
     // -------------------- Render UI --------------------
@@ -103,15 +140,24 @@ export default function StudentTickets() {
 
             {/* Top Bar */}
             <div className="mb-6 flex items-end justify-between">
+                <style>
+                    {`
+            .create-btn {
+                background-color: #032768 !important;
+                border-radius: 8px;
+                padding: 6px 20px;
+                color: white;
+            }
+            .create-btn:hover {
+                background-color: #2b6cb0 !important;
+            }
+        `}
+                </style>
                 <h2 className="text-3xl font-bold text-[#032768]">Support Center</h2>
                 <Button
                     type="primary"
+                    className="create-btn"
                     onClick={() => setOpen(true)}
-                    style={{
-                        backgroundColor: "#032768",
-                        borderRadius: "8px",
-                        padding: "6px 20px",
-                    }}
                 >
                     Create New
                 </Button>
@@ -248,6 +294,71 @@ export default function StudentTickets() {
                     )}
                 </Formik>
             </Modal>
+
+
+            <Modal
+                title="Ticket Details"
+                open={detailsOpen}
+                onCancel={() => setDetailsOpen(false)}
+                footer={null}
+                width={700}
+            >
+                {detailsLoading ? (
+                    <div className="flex justify-center py-10">
+                        <Spin size="large" />
+                    </div>
+                ) : ticketDetails ? (
+                    <div className="space-y-4">
+
+                        {/* Basic Info */}
+                        <div className="p-4 bg-gray-100 rounded-lg">
+                            <p><strong>Ticket ID:</strong> {ticketDetails.subject}</p>
+                            <p><strong>Title:</strong> {ticketDetails.title}</p>
+                            <p><strong>Status:</strong>
+                                <Tag color={statusColors[ticketDetails.status]}>
+                                    {ticketDetails.status.replace("_", " ")}
+                                </Tag>
+                            </p>
+                            <p><strong>Description:</strong> {ticketDetails.description}</p>
+                            <p><strong>Allowed Email:</strong> {ticketDetails.allowed_email}</p>
+                            <p><strong>Created At:</strong>
+                                {new Date(ticketDetails.createdAt).toLocaleString()}
+                            </p>
+                        </div>
+
+                        {/* Remarks */}
+                        <div>
+                            <h3 className="text-lg font-semibold mb-2">Remarks</h3>
+
+                            {ticketDetails.remarks?.length === 0 ? (
+                                <p className="text-gray-500">No replies yet.</p>
+                            ) : (
+                                ticketDetails.remarks.map((r) => (
+                                    <div
+                                        key={r._id}
+                                        className="border rounded-lg p-3 mb-3 bg-white shadow-sm"
+                                    >
+                                        <p><strong>{r.title}</strong></p>
+                                        <p className="text-sm text-gray-600">{r.subject}</p>
+                                        <div
+                                            className="mt-2 text-gray-700"
+                                            dangerouslySetInnerHTML={{ __html: r.description }}
+                                        ></div>
+                                        <p className="text-xs text-gray-500 mt-2">
+                                            {new Date(r.createdAt).toLocaleString()}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                    </div>
+                ) : (
+                    <p className="text-gray-600">No data available</p>
+                )}
+            </Modal>
+
         </div>
     );
 }
+

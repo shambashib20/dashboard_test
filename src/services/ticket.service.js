@@ -29,3 +29,13 @@ export const createTicket = async (payload) => {
         throw err;
     }
 };
+
+
+export const fetchTicketDetails = async (ticketId) => {
+    try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/ticket/details/${ticketId}`);
+        return response.data;
+    } catch (err) {
+        throw err;
+    }
+}

@@ -49,7 +49,10 @@ export default function Header() {
           <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg overflow-hidden z-50">
             <button className="w-full 
             cursor-pointer
-            text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+            text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+
+              onClick={() => navigate("/profile")}
+            >
               <User className="w-4 h-4 " /> Profile
             </button>
             <button
