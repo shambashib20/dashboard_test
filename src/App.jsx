@@ -21,6 +21,7 @@ import ResetPassword from "./components/ResetPassword";
 import Header from "./components/Header";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import WorkInProgress from "./components/WorkInProgress";
+import Profile from "./pages/StudentProfilePage";
 
 function Layout({ sidebarOpen, setSidebarOpen }) {
   return (
@@ -73,7 +74,7 @@ function App() {
             <Route path="/notice" element={<NoticePage />} />
 
             <Route path="/applications" element={<ApplicationsPage />} />
-            <Route path="/profile" element={<WorkInProgress />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFoundPage />} />
