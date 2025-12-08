@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Input, Button, message } from "antd";
-import axios from "axios";
+
 import { authService } from "../services/auth.service";
 import GlobalLoader from "../components/GlobalLoader";
 
