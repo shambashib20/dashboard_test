@@ -67,7 +67,7 @@ function PaymentStatus() {
       <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-100">
         <div className="flex items-start justify-between">
 
-          {/* LEFT SIDE */}
+
           <div className="flex-1 pr-6">
             <h2 className="text-3xl font-bold text-[#032768]">Payment Status</h2>
             <p className="text-gray-600 mt-2">
@@ -75,10 +75,10 @@ function PaymentStatus() {
             </p>
           </div>
 
-          {/* DIVIDER */}
+
           <div className="w-px bg-gray-300 h-20 mx-4"></div>
 
-          {/* RIGHT SIDE */}
+
           <div className="flex-1 pl-6 text-right">
             <h3 className="text-3xl font-bold text-[#032768]">Course Fees</h3>
             <p className="text-gray-600 text-2xl  mt-2">₹{student.course_fees}</p>
@@ -121,16 +121,14 @@ function PaymentStatus() {
 export default PaymentStatus;
 
 
-/* ============================================================
-   INSTALLMENTS TAB
-   — Uses student from props, UI untouched
-============================================================ */
 function AdmissionsInstallments({ student }) {
   const [openIndex, setOpenIndex] = useState(null);
   const [selectedInstallment, setSelectedInstallment] = useState(null);
 
   const filteredBills =
-    student?.admission_bills?.filter((ins) => ins.bill_number !== null) || [];
+    student?.admission_bills?.filter(
+      (ins) => ins.bill_number && ins.bill_number.trim() !== ""
+    ) || [];
 
   if (filteredBills.length === 0) {
     return (
@@ -291,7 +289,11 @@ function AdmissionsInstallments({ student }) {
     BREAKUP TAB
 ============================================================ */
 function AdmissionsBreakUps({ student }) {
-  if (!student?.admission_bills?.length) {
+  const bills = student?.admission_bills || [];
+  const validBills = bills.filter(
+    (d) => Number(d.ins_amount ?? 0) > 0
+  );
+  if (!validBills.length) {
     return (
       <div className="p-8 text-center">
         <div className="text-gray-400 text-6xl mb-4">📊</div>
@@ -305,22 +307,24 @@ function AdmissionsBreakUps({ student }) {
     );
   }
 
-  const total = student.admission_bills.reduce(
-    (sum, d) => sum + Number(d.amount ?? 0),
+
+
+  const total = validBills.reduce(
+    (sum, d) => sum + Number(d.ins_amount ?? 0),
     0
   );
 
-  const paid = student.admission_bills
+  const paid = validBills
     .filter((d) => d.status === "Done")
     .reduce((sum, d) => sum + Number(d.amount ?? 0), 0);
 
   const pending = total - paid;
 
-  const completedCount = student.admission_bills.filter(
+  const completedCount = validBills.filter(
     (d) => d.status === "Done"
   ).length;
 
-  const pendingCount = student.admission_bills.filter(
+  const pendingCount = validBills.filter(
     (d) => d.status !== "Done"
   ).length;
 
@@ -328,7 +332,7 @@ function AdmissionsBreakUps({ student }) {
     { label: "Total Fees", value: `₹${total}`, icon: "💰" },
     { label: "Paid Amount", value: `₹${paid}`, icon: "✅" },
     { label: "Pending Amount", value: `₹${pending}`, icon: "⏳" },
-    { label: "Total Installments", value: student.admission_bills.length, icon: "📋" },
+    { label: "Total Installments", value: validBills.length, icon: "📋" },
     { label: "Completed", value: completedCount, icon: "✔️" },
     { label: "Pending", value: pendingCount, icon: "🔄" },
   ];
@@ -375,11 +379,14 @@ function AdmissionsBreakUps({ student }) {
             </tr>
           </thead>
 
+
+
+
           <tbody className="bg-white divide-y divide-gray-200">
-            {student.admission_bills.map((d) => (
+            {validBills.map((d) => (
               <tr key={d.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">{d.ins_num}</td>
-                <td className="px-6 py-4">₹{d.amount ?? 0}</td>
+                <td className="px-6 py-4">₹{d.amount || d.ins_amount || 0}</td>
                 <td className="px-6 py-4">
                   <span
                     className={`px-3 py-1 rounded-full text-xs ${
@@ -391,7 +398,7 @@ function AdmissionsBreakUps({ student }) {
                     {d.status === "Done" ? "✅ Done" : "⏳ Pending"}
                   </span>
                 </td>
-                <td className="px-6 py-4">{d.bill_number ?? "—"}</td>
+                <td className="px-6 py-4">{d.bill_number || "—"}</td>
                 <td className="px-6 py-4">
                   {d.ins_due_date
                     ? new Date(d.ins_due_date).toLocaleDateString()
