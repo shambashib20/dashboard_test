@@ -25,32 +25,37 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       to: "/dashboard",
       icon: <FaHome className="text-lg" />,
       label: "Dashboard",
+      disabled: false,
     },
     {
       to: "/payment-status",
       icon: <FaMoneyCheckAlt className="text-lg" />,
       label: "Payment Status",
+      disabled: false,
     },
     {
       to: "/documents",
       icon: <FaFileAlt className="text-lg" />,
       label: "Documents",
+      disabled: false,
     },
     {
       to: "/certificates",
       icon: <MdOutlineWork className="text-lg" />,
       label: "Certificates",
+      disabled: false,
     },
     {
       to: "/id-card",
       icon: <FaIdBadge className="text-lg" />,
       label: "ID Card",
+      disabled: false,
     },
     {
       to: "/notice",
       icon: <FaBullhorn className="text-lg" />,
       label: "Notice",
-      disabled: true,
+      disabled: false,
     },
     {
       to: "/applications",

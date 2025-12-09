@@ -660,7 +660,9 @@ export default function CertificatePage() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>Documents</h2>
+      <h2 className="text-3xl font-bold text-[#032768] mb-4">
+        Bonafide Certificate
+      </h2>
 
       <div style={styles.grid}>
         {docs.map((doc) => (

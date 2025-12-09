@@ -1,91 +1,126 @@
-import React, { useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
-import demoNoticePdf from '../assets/demo-notice.pdf';
+import { useEffect, useState } from "react";
+import { noticeService } from "../services/notice.service";
+
+import { Document, Page } from "react-pdf";
+import GlobalLoader from "../components/GlobalLoader";
 
 
-
-// Mock data notices from your mockData.json
-const mockData = {
-  notices: [
-    {
-      id: 1,
-      title: "Admission Notice 2025",
-      date: "2025-07-30",
-      pdfUrl: demoNoticePdf,
-    },
-    {
-      id: 2,
-      title: "Exam Schedule Summer 2025",
-      date: "2025-06-10",
-      pdfUrl: demoNoticePdf,
-    },
-    {
-      id: 3,
-      title: "Fee Payment Guidelines",
-      date: "2025-05-01",
-      pdfUrl: demoNoticePdf,
-    },
-  ],
+export const collegeMap = {
+  MR_PHARMA: {
+    name: "M.R College of Pharmaceutical Sciences & Research", color: "#45897C",
+  },
+  MT_PHARMA: {
+    name: "Mother Teresa Institute of Pharmacy", color: "#D06F83",
+  },
+  SAHAJPATH_PHARMA: {
+    name: "Sahajpath College of Pharmacy", color: "#7066AF",
+  },
+  MM_NURSING: { name: "Mother Mary Institute of Nursing", color: "#5C5485", },
+  MR_NURSING: { name: "M.R Institute of Nursing", color: "#1579AB", },
+  RIJIYA_NURSING: { name: "Mother Rijiya Institute of Nursing", color: "#006030", },
+  MR_EDU: { name: "M.R_College_of_Education", color: "#3A3B95", },
+  MT_EDU_RESEARCH: { name: "Mother Teresa Institute of Education & Research", color: "#845A70", },
+  SHAHIDULLAH_EDU: { name: "Dr. Shahidullah Institute of Education", color: "#4B6293", },
+  SAHAJPATH: { name: "Sahajpath", color: "#896F54", },
+  MR_MANAGEMENT: { name: "M.R College of Management & Allied Health Sciences", color: "#D9822B", },
 };
+function normalize(str) {
+  return String(str)
+    .toLowerCase()
+    .replace(/[\s._-]+/g, "")
+    .trim();
+}
+
+function getCollegeEnumKeyByName(collegeName) {
+  const normalizedName = normalize(collegeName);
+
+  return Object.keys(collegeMap).find((key) => {
+    const mappedName = collegeMap[key].name;
+    return normalize(mappedName) === normalizedName;
+  });
+}
 
 export default function NoticePage() {
-  const [selectedNotice, setSelectedNotice] = useState(null);
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const student = JSON.parse(localStorage.getItem("student"));
+  const collegeName = student?.colleges?.college_name;
+  console.log(collegeName, 'ksksk')
+
+  const collegeKey = getCollegeEnumKeyByName(collegeName);
+  console.log(collegeKey, 'ksksk')
+
+  useEffect(() => {
+    async function fetchNotices() {
+      try {
+        if (!collegeKey) {
+          console.error("College key not found for:", collegeName);
+          setLoading(false);
+          return;
+        }
+
+        const response = await noticeService.getNotices({
+          collegeKey,
+          page: 1,
+          limit: 20,
+        });
+
+        setNotices(response.items || []);
+      } catch (err) {
+        console.error("Failed to fetch notices:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNotices();
+  }, [collegeKey]);
+
+  if (loading) {
+    return <GlobalLoader />
+  }
+
+  const handleDownload = (pdfUrl) => {
+    if (!pdfUrl) return;
+
+    // simplest: open in new tab (browser will show or download)
+    window.open(pdfUrl, "_blank", "noopener,noreferrer");
+  };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <h2 className="text-3xl font-bold text-emerald-700">Notices</h2>
+    <div className="w-full mx-auto p-6 space-y-8">
+      {/* TITLE */}
+      <h2 className="text-3xl font-bold text-[#032768] mb-4">Notices</h2>
 
-      {/* Notices List */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {mockData.notices.map((notice) => (
+      {/* NOTICE CARDS */}
+      <div className="space-y-4">
+        {notices.length === 0 && (
+          <p className="text-gray-600">No notices available for your college.</p>
+        )}
+
+        {notices.map((notice) => (
           <div
-            key={notice.id}
-            className="border rounded-lg p-4 cursor-pointer hover:shadow-lg"
-            onClick={() => setSelectedNotice(notice)}
+            key={notice._id}
+            className="border rounded-lg p-4 flex items-center justify-between hover:shadow-sm transition"
           >
-            <h3 className="font-semibold text-lg">{notice.title}</h3>
-            <p className="text-sm text-gray-600">
-              {new Date(notice.date).toLocaleDateString()}
-            </p>
+            <div>
+              <h3 className="font-semibold text-lg">{notice.title}</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {new Date(notice.noticeDate).toLocaleDateString("en-GB")}
+              </p>
+            </div>
+
+            <button
+              onClick={() => handleDownload(notice.pdfUrl)}
+              className="ml-4 px-4 py-2 rounded bg-[#032768] text-white text-sm hover:bg-[#021b4a] transition"
+              disabled={!notice.pdfUrl}
+            >
+              Download PDF
+            </button>
           </div>
         ))}
       </div>
-
-      {/* PDF Preview */}
-      {selectedNotice && (
-        <div className="mt-8">
-          <button
-            className="mb-4 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-            onClick={() => setSelectedNotice(null)}
-          >
-            Close Preview
-          </button>
-
-          <div className="border rounded shadow p-4">
-            <h3 className="text-xl font-bold mb-4">{selectedNotice.title}</h3>
-
-            <Document
-              file={selectedNotice.pdfUrl}
-              loading={<p>Loading PDF preview...</p>}
-              error={<p>Failed to load PDF preview.</p>}
-              onLoadError={(error) =>
-                console.error("Error loading PDF:", error)
-              }
-            >
-              <Page pageNumber={1} width={600} />
-            </Document>
-
-            <a
-              href={selectedNotice.pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-block text-blue-600 underline"
-            >
-              Open full PDF
-            </a>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
