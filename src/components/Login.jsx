@@ -79,16 +79,34 @@ function Login() {
             <form className="space-y-6" onSubmit={handleSubmit}>
               {/* Email */}
 
-
+   {/* Phone Number */}
+              <div>
+                <label
+                  htmlFor="phone_number"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Phone Number
+                </label>
+                <input
+                  id="phone_number"
+                  name="phone_number"
+                  type="text"
+                  required
+                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm"
+                  placeholder="Enter phone number"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                />
+              </div>
               {/* Password */}
               <div>
-                <div className="mt-2 text-sm bg-blue-50 text-blue-800 border border-blue-300 px-3 py-2 rounded-md shadow-sm">
+                {/* <div className="mt-2 text-sm bg-blue-50 text-blue-800 border border-blue-300 px-3 py-2 rounded-md shadow-sm">
                   <p>
                     <strong>Note:</strong> Enter your Aadhaar number as the password.
                     If Aadhaar was not provided during admission, use the default password:
                     <strong>12345678</strong>.
                   </p>
-                </div>
+                </div> */}
                 <label
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-700 mb-1"
@@ -116,25 +134,7 @@ function Login() {
 
               </div>
 
-              {/* Phone Number */}
-              <div>
-                <label
-                  htmlFor="phone_number"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Phone Number
-                </label>
-                <input
-                  id="phone_number"
-                  name="phone_number"
-                  type="text"
-                  required
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm"
-                  placeholder="Enter phone number"
-                  value={formData.phone_number}
-                  onChange={handleChange}
-                />
-              </div>
+           
 
               {/* Submit Button */}
               <div>
